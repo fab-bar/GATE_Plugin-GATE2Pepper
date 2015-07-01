@@ -36,6 +36,8 @@
 
 package gate.pepper;
 
+import gate.salt.GATE2Salt;
+
 import gate.Corpus;
 import gate.Document;
 import gate.creole.metadata.AutoInstance;
@@ -50,6 +52,8 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JOptionPane;
 
+import org.eclipse.emf.common.util.URI;
+
 import de.hu_berlin.german.korpling.saltnpepper.pepper.cli.PepperStarterConfiguration;
 import de.hu_berlin.german.korpling.saltnpepper.pepper.common.FormatDesc;
 import de.hu_berlin.german.korpling.saltnpepper.pepper.common.PepperModuleDesc;
@@ -57,11 +61,17 @@ import de.hu_berlin.german.korpling.saltnpepper.pepper.connectors.PepperConnecto
 import de.hu_berlin.german.korpling.saltnpepper.pepper.connectors.impl.PepperOSGiConnector;
 import de.hu_berlin.german.korpling.saltnpepper.pepper.exceptions.PepperFWException;
 
+
+import de.hu_berlin.german.korpling.saltnpepper.salt.SaltFactory;
+import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.SaltProject;
+
+
 @SuppressWarnings("serial")
 @CreoleResource(name = "PepperExporter", tool = true, autoinstances = @AutoInstance, comment = "Export GATE documents using Pepper", helpURL = "")
 public class PepperExporter extends ResourceHelper {
 
 	private PepperConnector pepper = null;
+	private GATE2Salt mapper = null;
 	List<String> exporterList = new ArrayList<String>();
 
 	
@@ -88,6 +98,8 @@ public class PepperExporter extends ResourceHelper {
     	
     	populatePepperExporterList();
 
+	mapper = new GATE2Salt();
+
 	}
 	
 	
@@ -113,19 +125,31 @@ public class PepperExporter extends ResourceHelper {
     List<Action> actions = new ArrayList<Action>();
 
     if(handle.getTarget() instanceof Corpus) {
-    	actions.add(new AbstractAction("Export with Pepper...") {
+//    	actions.add(new AbstractAction("Export with Pepper...") {
+//
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//            	
+//            	// choose the Exporter
+//            	Object answer = JOptionPane.showInputDialog(null,
+//                        "Choose the Exporter to use", "PepperExporter",
+//                        JOptionPane.QUESTION_MESSAGE, null, exporterList.toArray(),
+//                        exporterList.get(0));      
+//
+//            }
+//    	});
+
+	actions.add(new AbstractAction("Save to SALT-XML...") {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-            	
-            	// choose the Exporter
-            	Object answer = JOptionPane.showInputDialog(null,
-                        "Choose the Exporter to use", "PepperExporter",
-                        JOptionPane.QUESTION_MESSAGE, null, exporterList.toArray(),
-                        exporterList.get(0));      
 
-            }
-    	});
+		SaltProject project= SaltFactory.eINSTANCE.createSaltProject();
+		project.getSCorpusGraphs().add(mapper.mapCorpus((Corpus) handle.getTarget()));
+		project.saveSaltProject(URI.createFileURI("/home/fabian/test/"));
+
+	    }
+	});
 
 //		// Only choose and configure the exporter - 
 //    	// the mapping to Salt is done with standard options

@@ -1,0 +1,3 @@
+[submodule "src/main/java/gate/salt"]
+	path = src/main/java/gate/salt
+	url = https://github.com/fab-bar/lib_GATE-Salt-Mapper.git
